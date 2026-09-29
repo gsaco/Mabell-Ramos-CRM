@@ -1,0 +1,21 @@
+import Decimal from 'decimal.js';
+import type {Base, Money, Need} from './types';
+export const people=['Mabel','Ana'] as const;
+export const needs:Need[]=['Consumo y recompra','Regalo','Descubrimiento de sabores','Reunión/evento','Otra','Por conocer'];
+export const channels=['WhatsApp','Instagram','Presencial','Llamada','Otro','Por registrar'];
+export const origins=['Feria','Recomendación','Instagram','Institución','Otra','No conocido'];
+export const id=()=>crypto.randomUUID();
+export const iso=()=>new Date().toISOString();
+export const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Lima',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+export const base=():Base=>({id:id(),revision:0,createdAt:iso(),updatedAt:iso()});
+export function cents(value:string|number):Money {let text=String(value).trim().replace(/\s|S\/|PEN/gi,'');if(!text)throw new Error('Escribe el importe');if(text.includes(',')&&text.includes('.')){if(text.lastIndexOf(',')>text.lastIndexOf('.'))text=text.replace(/\./g,'').replace(',','.');else text=text.replace(/,/g,'');}else if(text.includes(',')){if(/,\d{3}$/.test(text))throw new Error('Importe ambiguo. Escribe los céntimos con dos decimales, por ejemplo 1000.00');text=text.replace(',','.');}if(!/^-?\d+(\.\d{1,2})?$/.test(text))throw new Error('Escribe un importe con hasta dos decimales');const n=new Decimal(text).times(100);if(!n.isInteger()||!Number.isSafeInteger(n.toNumber()))throw new Error('Importe fuera de rango');return n.toNumber();}
+export const money=(n:number|null|undefined)=>n===null||n===undefined?'Por registrar':new Intl.NumberFormat('es-PE',{style:'currency',currency:'PEN'}).format(n/100);
+export const decimal=(n:number|null|undefined)=>n==null?'':new Decimal(n).div(100).toFixed(2);
+export const dateLabel=(s:string|null|undefined)=>!s?'Por confirmar':new Date(s.length===10?s+'T12:00:00':s).toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric',...(s.length===10?{}:{timeZone:'America/Lima'})});
+export const normalize=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+export const dateOf=(s:string)=>s.length===10?s:new Intl.DateTimeFormat('en-CA',{timeZone:'America/Lima',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(s));
+export const inPeriod=(date:string,from:string,to:string)=>dateOf(date)>=from&&dateOf(date)<=to;
+export const addDays=(s:string,n:number)=>{const d=new Date(s+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);};
+export const monthStart=(s=today())=>s.slice(0,8)+'01';
+export const safeUrl=(s:string)=>{try{const u=new URL(s);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}};
+export const whatsapp=(phone:string)=>{const n=phone.replace(/\D/g,'');return n.length>=9&&n.length<=15?`https://wa.me/${n.length===9?'51':''}${n}`:null;};

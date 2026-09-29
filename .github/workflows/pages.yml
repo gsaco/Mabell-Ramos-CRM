@@ -1,0 +1,75 @@
+name: Comprobar interfaz y preparar Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'data/**'
+      - 'snapshots/**'
+      - 'receipts/**'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publicar sólo la interfaz en GitHub Pages (requiere Pages configurado)'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm run build
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+      - name: Verificar que el resultado no incluye carpetas privadas
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readdirSync } from 'node:fs';
+          import { join } from 'node:path';
+          const forbidden = new Set(['data', 'snapshots', 'receipts']);
+          function inspect(directory) {
+            for (const entry of readdirSync(directory, { withFileTypes: true })) {
+              if (forbidden.has(entry.name.toLowerCase())) throw new Error('La compilación contiene una carpeta privada.');
+              if (entry.isSymbolicLink()) throw new Error('La compilación contiene un enlace simbólico.');
+              if (entry.isDirectory()) inspect(join(directory, entry.name));
+            }
+          }
+          inspect('dist');
+          NODE
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+          retention-days: 1
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && inputs.publish
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publicar únicamente el artefacto de interfaz
+        id: deployment
+        uses: actions/deploy-pages@v4
