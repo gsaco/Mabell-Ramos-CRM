@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, ShoppingBag, MessageCircle, Wallet, ArrowUpRight, ClipboardList } from 'lucide-react';
 import { useApp } from '../services/store';
-import { addDays, dateLabel, dateOf, money, safeUrl, today } from '../domain/helpers';
+import {personLabel,  addDays, dateLabel, dateOf, money, safeUrl, today } from '../domain/helpers';
 import { orderBalance, purchaseBalance } from '../domain/selectors';
 import type { Inquiry, Task } from '../domain/types';
 import { Badge, Card, Empty, ExternalLink, Notice, PageHeader, Stat, Tabs } from '../components/ui';
@@ -44,7 +44,7 @@ export function HomeScreen() {
     order.deliveryDate >= day && order.deliveryDate <= until && mine(order.responsible));
 
   return <div className="stack">
-    <PageHeader eyebrow={dateLabel(day)} title={`Hola, ${profile}`} description="Lo que debemos atender, preparar y recordar. La información es compartida." actions={<Link className="btn btn-primary" to="/consultas/nueva"><MessageCircle size={18} />Nueva consulta</Link>} />
+    <PageHeader eyebrow={dateLabel(day)} title={`Hola, ${personLabel(profile)}`} description="Lo que debemos atender, preparar y recordar. La información es compartida." actions={<Link className="btn btn-primary" to="/consultas/nueva"><MessageCircle size={18} />Nueva consulta</Link>} />
     <Tabs value={view} onChange={setView} values={[{ id: 'all', label: 'Todo' }, { id: 'mine', label: 'Mi trabajo' }]} />
     {!state.settings.onboardingDone && <Notice tone="warning">Antes de operar, revisen datos, responsables, cuentas y condiciones reales del negocio. <Link className="text-link" to="/ajustes">Revisar configuración</Link></Notice>}
 
@@ -68,7 +68,7 @@ export function HomeScreen() {
           <div className="list-main">
             <Link className="text-link" to={`/consultas/${inquiry.id}`}>{clientName(inquiry.clientId, inquiry.contactName)}</Link>
             <p>{inquiry.summary}</p>
-            <small className="muted">{inquiry.modality} · {inquiry.channel} · {inquiry.responsible} · {dateLabel(inquiry.receivedAt)}</small>
+            <small className="muted">{inquiry.modality} · {inquiry.channel} · {personLabel(inquiry.responsible)} · {dateLabel(inquiry.receivedAt)}</small>
             <p><strong>Qué sigue:</strong> {inquiry.nextAction || 'Precisar la solicitud'}</p>
             {inquiry.waitingClient ? <Badge>Esperando al cliente</Badge> : inquiry.responseDue ? <Badge tone={inquiry.responseDue < now ? 'danger' : 'warning'}>{inquiry.responseDue < now ? 'Plazo vencido' : 'Responder antes de'} · {dateLabel(inquiry.responseDue)}</Badge> : <Badge>Plazo por acordar</Badge>}
           </div>
@@ -78,7 +78,7 @@ export function HomeScreen() {
       <Card title="Qué debemos hacer" subtitle="Hoy, tareas anteriores y los próximos tres días" action={<Link className="text-link" to="/agenda">Ver dos semanas</Link>}>
         {nearTasks.length ? nearTasks.slice(0, 6).map(task => <div className="list-row" key={task.id}>
           <div className="list-main"><Link className="text-link" to={`/agenda?task=${encodeURIComponent(task.id)}`}>{task.title}</Link>
-            <p>{task.kind} · {task.responsible}{task.collaborator ? ` · Apoyo: ${task.collaborator}` : ''}</p>
+            <p>{task.kind} · {personLabel(task.responsible)}{task.collaborator ? ` · Apoyo: ${task.collaborator}` : ''}</p>
             <small className="muted">{task.date ? dateLabel(task.date) : 'Fecha por programar'}{task.time ? ` · ${task.time}` : ''} · {task.minutes === null ? 'Duración por estimar' : `${task.minutes} minutos`}</small>
             {task.resourceStatus === 'Por confirmar' && <p><Badge tone="warning">Recurso o apoyo por confirmar{task.resource ? `: ${task.resource}` : ''}</Badge></p>}
             {task.date && task.date < day && <Badge tone="warning">Revisar fecha de esta tarea</Badge>}
@@ -90,7 +90,7 @@ export function HomeScreen() {
     <div className="split-grid">
       <Card title="Por cobrar o devolver" subtitle="Acuerdos confirmados; el cobro y la entrega se registran por separado" action={<Link className="text-link" to="/dinero?tab=pendientes">Ver Dinero</Link>}>
         {receivables.length ? receivables.slice(0, 4).map(({ order, balance }) => <div className="list-row" key={order.id}>
-          <div className="list-main"><Link className="text-link" to={`/pedidos/${order.id}`}>{order.code} · {clientName(order.clientId, order.contactName)}</Link><p>{order.dueDate ? `Fecha acordada: ${dateLabel(order.dueDate)}` : 'Fecha de pago por acordar'}</p><small>{order.status} · {order.responsible}</small></div>
+          <div className="list-main"><Link className="text-link" to={`/pedidos/${order.id}`}>{order.code} · {clientName(order.clientId, order.contactName)}</Link><p>{order.dueDate ? `Fecha acordada: ${dateLabel(order.dueDate)}` : 'Fecha de pago por acordar'}</p><small>{order.status} · {personLabel(order.responsible)}</small></div>
           <div className="stack"><strong>{money(Math.abs(balance))}</strong><Badge tone={balance < 0 ? 'warning' : 'neutral'}>{balance < 0 ? 'Saldo a favor del cliente' : 'Por cobrar'}</Badge></div>
         </div>) : <Empty text="No hay saldos pendientes en los pedidos registrados." />}
       </Card>

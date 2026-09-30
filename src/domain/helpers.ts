@@ -1,6 +1,8 @@
 import Decimal from 'decimal.js';
 import type {Base, Money, Need} from './types';
 export const people=['Mabel','Ana'] as const;
+// Keep stored profile IDs compatible; use the correct name in visible labels.
+export const personLabel=(person:string)=>person.replace(/\bMabel\b/g,'Mabell');
 export const needs:Need[]=['Consumo y recompra','Regalo','Descubrimiento de sabores','Reunión/evento','Otra','Por conocer'];
 export const channels=['WhatsApp','Instagram','Presencial','Llamada','Otro','Por registrar'];
 export const origins=['Feria','Recomendación','Instagram','Institución','Otra','No conocido'];
