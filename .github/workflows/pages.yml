@@ -1,66 +1,39 @@
-name: Comprobar interfaz y preparar Pages
-
+name: Publicar presentación Mabell Ramos
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'data/**'
-      - 'snapshots/**'
-      - 'receipts/**'
+    paths:
+      - 'presentacion/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
-    inputs:
-      publish:
-        description: 'Publicar sólo la interfaz en GitHub Pages (requiere Pages configurado)'
-        required: true
-        type: boolean
-        default: false
-
 permissions:
   contents: read
-
 concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
-
+  group: github-pages
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
-      - run: npm run build
-        env:
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/
-      - name: Verificar que el resultado no incluye carpetas privadas
-        shell: bash
+      - name: Comprobar la presentación
         run: |
-          node --input-type=module <<'NODE'
-          import { readdirSync } from 'node:fs';
-          import { join } from 'node:path';
-          const forbidden = new Set(['data', 'snapshots', 'receipts']);
-          function inspect(directory) {
-            for (const entry of readdirSync(directory, { withFileTypes: true })) {
-              if (forbidden.has(entry.name.toLowerCase())) throw new Error('La compilación contiene una carpeta privada.');
-              if (entry.isSymbolicLink()) throw new Error('La compilación contiene un enlace simbólico.');
-              if (entry.isDirectory()) inspect(join(directory, entry.name));
-            }
-          }
-          inspect('dist');
-          NODE
+          test -s presentacion/index.html
+          test -d presentacion/assets
+          python3 - <<'PY'
+          import pathlib,re
+          root=pathlib.Path('presentacion')
+          html=(root/'index.html').read_text()
+          for asset in set(re.findall(r'\./assets/[A-Za-z0-9_.-]+', html)):
+              assert (root/asset).is_file(), asset
+          assert 'Todo lo anotado' in html
+          assert 'window.MABELL_DECK' in html
+          PY
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: presentacion
           retention-days: 1
-
   deploy:
-    if: github.event_name == 'workflow_dispatch' && inputs.publish
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -70,6 +43,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Publicar únicamente el artefacto de interfaz
+      - name: Publicar presentación
         id: deployment
         uses: actions/deploy-pages@v4
