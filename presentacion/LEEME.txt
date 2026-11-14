@@ -5,19 +5,18 @@ El archivo incluye imágenes y tipografías y puede presentarse sin internet.
 Los enlaces externos requieren conexión.
 
 CONTENIDO
-23 diapositivas principales y 4 de apoyo.
-1–2: propósito de la asesoría y punto de partida.
-3–9: productos, seis paquetes, recorrido comercial, catering, historia e identidad visual.
-10–14: gestión compartida, entregas, pedidos, clientes, dinero y catálogo editable.
-15–18: exportación, traslado manual al control, costos, precios y punto de equilibrio.
-19–20: avance sanitario y siguientes pasos.
-21–23: acompañamiento recurrente, resultados y continuidad durante seis meses.
-A1–A4: detalle sanitario y Canvas para preguntas.
+19 diapositivas principales y 4 de apoyo.
+1: propósito de la asesoría.
+2–7: oferta, recorrido comercial, catering, historia e identidad visual.
+8–12: gestión compartida, entregas, pedidos, clientes, dinero y catálogo editable.
+13–16: exportación, traslado manual al control, costos, precios y equilibrio.
+17: avance sanitario.
+18–19: acompañamiento recurrente y continuidad durante seis meses.
+A1–A4: detalle sanitario y Canvas, disponibles desde el índice.
 
 CONTROLES
 Flechas: cambiar de diapositiva. Inicio y Fin: portada y cierre.
 Índice: saltar a una diapositiva principal o de apoyo.
-Material de apoyo: abre el índice desde el cierre.
 Volver al cierre: regresa desde las diapositivas de apoyo.
 Notas: guía de exposición. Esc cierra las notas o una ampliación.
 Toca una captura para ampliarla. Pantalla completa amplía la presentación.
