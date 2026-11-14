@@ -26,7 +26,7 @@ jobs:
           html=(root/'index.html').read_text()
           for asset in set(re.findall(r'\./assets/[A-Za-z0-9_.-]+', html)):
               assert (root/asset).is_file(), asset
-          assert 'Todo lo anotado' in html
+          assert 'window.MABELL_ASSETS' in html
           assert 'window.MABELL_DECK' in html
           PY
       - uses: actions/upload-pages-artifact@v3
